@@ -79,7 +79,7 @@ mkdir build && cd build
 cmake -D GLIBCXX_USE_CXX11_ABI=0 \
       -D CMAKE_BUILD_TYPE=RELEASE \
       -D ENABLE_FAST_MATH=ON \
-      -D CMAKE_INSTALL_PREFIX=$cwd/opencv_lib \
+      -D CMAKE_INSTALL_PREFIX=$cwd/opencv_src/opencv_lib \
       -D INSTALL_PYTHON_EXAMPLES=ON \
       -D WITH_TBB=ON \
       -D WITH_V4L=ON \
