@@ -8,8 +8,13 @@
 	*/
 #include "OpenHSML.h"
 
-#ifndef OPENHSML
-#define OPENHSML
+#include <opencv2/opencv.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
+
+#include <fstream>
+#include <experimental/filesystem>
 
 bool finished;
 bool finished2d;
@@ -91,7 +96,6 @@ void OpenHSML::convert_vector_to_xyz_vector(std::vector<double> vect, std::strin
 }
 void OpenHSML::convert_depth_vector_to_img_grayscale(std::vector<float> z_vect, cv::Mat& ImgGrayScale, int imageWidth, int imageHeight) {
   std::vector<int> z_array_norm(imageWidth*imageHeight);
-  const auto [min, max] = std::minmax_element(begin(z_vect), end(z_vect));
   for (size_t j = 0; j < z_vect.size(); j++) {
     if ( (0.<(float)z_vect[j]) & ((float)z_vect[j]<=3.) ) { z_array_norm[j] = (int)((float)z_vect[j] * 200. / 3.) + 0; }
     else if ( (3.<(float)z_vect[j]) & ((float)z_vect[j]<=6.) ) { z_array_norm[j] = (int)((float)z_vect[j] * 40.  / 6.) + 200; }
@@ -183,7 +187,7 @@ void OpenHSML::read_yaml_file_of_point_of_calibration(std::string calibration_na
   for (size_t i=0; i<points_2D_.size(); i++) {
     points_3D.push_back(cv::Point2d(points_3D_[i].x, points_3D_[i].y));
     points_2D.push_back(cv::Point2d(points_2D_[i].x, points_2D_[i].y));
-    points_xyz.push_back({x_3D[i].as<double>(), y_3D[i].as<double>(), z_3D[i].as<double>()});
+    points_xyz.push_back({x_3D[i].as<float>(), y_3D[i].as<float>(), z_3D[i].as<float>()});
   }
 }
 void OpenHSML::modification_of_camera_parameters(std::vector<double>& depth_parameters) {
@@ -336,7 +340,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
 
         if ((next_img==false) & (point_mode==true)) {
           finished2d=false; finished3d=false;
-          cv::circle(Image2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+          cv::circle(Image2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
 
           cv::destroyWindow("Original2D"); cv::destroyWindow("Original3D_without_selection");
           cv::namedWindow("Original3D"); cv::namedWindow("Original2D_without_selection");
@@ -348,7 +352,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
           }
 
           finished2d=false; finished3d=false;
-          cv::circle(Image3D, (cvPoint(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
+          cv::circle(Image3D, (cv::Point(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
           cv::destroyWindow("Original3D"); cv::destroyWindow("Original2D_without_selection");
 
           points_2D_yaml_save.push_back( {(double)points_2D[i].x, (double)points_2D[i].y} );
@@ -378,7 +382,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
 
         if ((next_img==false) & (quadrilater_mode==true)) {
           finished2d=false; finished3d=false;
-          cv::circle(Image2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+          cv::circle(Image2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
           std::cout << "Point 1 selected in rgb image: " << points_2D[i].x << ", " << points_2D[i].y << '\n'; i=i+1;
 
           // 2
@@ -390,7 +394,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
             if((char)cv::waitKey(50) == 27) { std::cout << "'ESC' pressed: you can't exit here. Select a second point." << std::endl;}
           }
           finished2d=false; finished3d=false;
-          cv::circle(Image2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+          cv::circle(Image2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
           std::cout << "Point 2 selected in rgb image: " << points_2D[i].x << ", " << points_2D[i].y << '\n'; i=i+1;
 
           // 3
@@ -402,7 +406,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
             if((char)cv::waitKey(50) == 27) { std::cout << "'ESC' pressed: you can't exit here. Select a third point." << std::endl;}
           }
           finished2d=false; finished3d=false;
-          cv::circle(Image2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+          cv::circle(Image2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
           std::cout << "Point 3 selected in rgb image: " << points_2D[i].x << ", " << points_2D[i].y << '\n'; i=i+1;
 
           // 4
@@ -414,7 +418,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
             if((char)cv::waitKey(50) == 27) { std::cout << "'ESC' pressed: you can't exit here. Select a fourth point." << std::endl; }
           }
           finished2d=false; finished3d=false;
-          cv::circle(Image2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+          cv::circle(Image2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
           std::cout << "Point 4 selected in rgb image: " << points_2D[i].x << ", " << points_2D[i].y << '\n';
 
           // Draw square
@@ -423,7 +427,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
           sampling_square_with_four_points( {points_2D[i-3].x, points_2D[i-3].y}, {points_2D[i-2].x, points_2D[i-2].y}, {points_2D[i-1].x, points_2D[i-1].y}, {points_2D[i-0].x, points_2D[i-0].y}, nb_of_pt_by_line, uv_vect);
           for (size_t k = 0; k < uv_vect.size(); k++) {
             points_2D.push_back( cv::Point(uv_vect[k][0], uv_vect[k][1]) ); i=i+1;
-            cv::circle(Image2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+            cv::circle(Image2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
           }
 
           i=i-4-uv_vect.size()+1;
@@ -440,7 +444,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
             if((char)cv::waitKey(50) == 27) { std::cout << "'ESC' pressed: you can't exit here. Select a first point." << std::endl; }
           }
           finished2d=false; finished3d=false;
-          cv::circle(Image3D, (cvPoint(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
+          cv::circle(Image3D, (cv::Point(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
           std::cout << "Point 1 selected in depth image: " << points_3D[i].x << ", " << points_3D[i].y << '\n'; i=i+1;
 
           // 2
@@ -451,7 +455,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
             if((char)cv::waitKey(50) == 27) { std::cout << "'ESC' pressed: you can't exit here. Select a second point." << std::endl; }
           }
           finished2d=false; finished3d=false;
-          cv::circle(Image3D, (cvPoint(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
+          cv::circle(Image3D, (cv::Point(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
           std::cout << "Point 2 selected in depth image: " << points_3D[i].x << ", " << points_3D[i].y << '\n'; i=i+1;
 
           // 3
@@ -462,7 +466,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
             if((char)cv::waitKey(50) == 27) { std::cout << "'ESC' pressed: you can't exit here. Select a third point." << std::endl; }
           }
           finished2d=false; finished3d=false;
-          cv::circle(Image3D, (cvPoint(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
+          cv::circle(Image3D, (cv::Point(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
           std::cout << "Point 3 selected in depth image: " << points_3D[i].x << ", " << points_3D[i].y << '\n'; i=i+1;
 
           // 4
@@ -473,7 +477,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
             if((char)cv::waitKey(50) == 27) { std::cout << "'ESC' pressed: you can't exit here. Select a fourth point." << std::endl; }
           }
           finished2d=false; finished3d=false;
-          cv::circle(Image3D, (cvPoint(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
+          cv::circle(Image3D, (cv::Point(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
           std::cout << "Point 4 selected in depth images: " << points_3D[i].x << ", " << points_3D[i].y << '\n';
 
           // Draw square
@@ -485,7 +489,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
             nb_of_pt_by_line, uv_vect);
             for (size_t k = 0; k < uv_vect.size(); k++) {
               points_3D.push_back( cv::Point(uv_vect[k][0], uv_vect[k][1]) ); i=i+1;
-              cv::circle(Image3D, (cvPoint(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
+              cv::circle(Image3D, (cv::Point(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
             }
 
             finished2d=false; finished3d=false;
@@ -522,7 +526,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
 
           if ((next_img==false) & (line_mode==true)) {
             finished2d=false; finished3d=false;
-            cv::circle(Image2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+            cv::circle(Image2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
             std::cout << "Point 1 selected in rgb image: " << points_2D[i].x << ", " << points_2D[i].y << '\n'; i=i+1;
 
             // 2
@@ -534,7 +538,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
               if((char)cv::waitKey(50) == 27) { std::cout << "'ESC' pressed: you can't exit here. Select a second point." << std::endl;}
             }
             finished2d=false; finished3d=false;
-            cv::circle(Image2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+            cv::circle(Image2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
             std::cout << "Point 2 selected in rgb image: " << points_2D[i].x << ", " << points_2D[i].y << '\n';
 
             // Draw line
@@ -542,7 +546,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
             sampling_line_between_two_points({points_2D[i-1].x, points_2D[i-1].y}, {points_2D[i-0].x, points_2D[i-0].y}, 8, uv_vect);
             for (size_t k = 1; k < uv_vect.size()-1; k++) {
               points_2D.push_back( cv::Point(uv_vect[k][0], uv_vect[k][1]) ); i=i+1;
-              cv::circle(Image2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+              cv::circle(Image2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
             }
             i=i-uv_vect.size()+1;
 
@@ -558,7 +562,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
               if((char)cv::waitKey(50) == 27) { std::cout << "'ESC' pressed: you can't exit here. Select a first point." << std::endl; }
             }
             finished2d=false; finished3d=false;
-            cv::circle(Image3D, (cvPoint(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
+            cv::circle(Image3D, (cv::Point(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
             std::cout << "Point 1 selected in depth image: " << points_3D[i].x << ", " << points_3D[i].y << '\n'; i=i+1;
 
             // 2
@@ -569,7 +573,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
               if((char)cv::waitKey(50) == 27) { std::cout << "'ESC' pressed: you can't exit here. Select a second point." << std::endl; }
             }
             finished2d=false; finished3d=false;
-            cv::circle(Image3D, (cvPoint(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
+            cv::circle(Image3D, (cv::Point(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
             std::cout << "Point 2 selected in depth image: " << points_3D[i].x << ", " << points_3D[i].y << '\n';
 
             // Draw line
@@ -577,7 +581,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
             sampling_line_between_two_points({points_3D[i-1].x, points_3D[i-1].y}, {points_3D[i-0].x, points_3D[i-0].y}, 8, uv_vect);
             for (size_t k = 1; k < uv_vect.size()-1; k++) {
               points_3D.push_back( cv::Point(uv_vect[k][0], uv_vect[k][1]) ); i=i+1;
-              cv::circle(Image3D, (cvPoint(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
+              cv::circle(Image3D, (cv::Point(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
             }
             i=i-uv_vect.size()+1;
 
@@ -684,7 +688,7 @@ void OpenHSML::determine_fundamentalMatrix_and_projectionMatrix(cv::Mat& fundame
   std::vector<std::array<float, 3>> points_xyz;points_xyz.clear();
   read_yaml_file_of_point_of_calibration(calibration_namefile+"/points_of_calibration.yaml", points_3D, points_2D, points_xyz);
 
-  fundamental_matrix = cv::findFundamentalMat(points_3D, points_2D, CV_FM_RANSAC); // other options: CV_FM_7POINT, CV_FM_8POINT, CV_FM_RANSAC, CV_FM_LMEDS
+  fundamental_matrix = cv::findFundamentalMat(points_3D, points_2D, cv::FM_RANSAC); // other options: CV_FM_7POINT, CV_FM_8POINT, CV_FM_RANSAC, CV_FM_LMEDS
   projection_matrix = determine_projectionMatrix(points_2D, points_xyz);
 }
 void OpenHSML::check_parameters_of_calibration_and_change_if_necessary(std::string calibration_namefile) {
@@ -715,9 +719,9 @@ void OpenHSML::save_image_with_points_and_epipolar_lines(std::string calibration
   read_yaml_file_of_calibration(calibration_namefile+"/calibration.yaml", depth_parameters);
   read_yaml_file_of_point_of_calibration(calibration_namefile+"/points_of_calibration.yaml", points_3D, points_2D, points_xyz);
 
-  cv::Mat Image2DWithPoints(cvSize(depth_parameters[0], depth_parameters[1]), CV_8UC3, cv::Scalar(255, 255, 255));
-  cv::Mat Image3DWithEpipolarLines(cvSize(depth_parameters[0], depth_parameters[1]), CV_8UC3, cv::Scalar(255, 255, 255));
-  cv::Mat Image2DWithEpipolarLines(cvSize(depth_parameters[0], depth_parameters[1]), CV_8UC3, cv::Scalar(255, 255, 255));
+  cv::Mat Image2DWithPoints(cv::Size(depth_parameters[0], depth_parameters[1]), CV_8UC3, cv::Scalar(255, 255, 255));
+  cv::Mat Image3DWithEpipolarLines(cv::Size(depth_parameters[0], depth_parameters[1]), CV_8UC3, cv::Scalar(255, 255, 255));
+  cv::Mat Image2DWithEpipolarLines(cv::Size(depth_parameters[0], depth_parameters[1]), CV_8UC3, cv::Scalar(255, 255, 255));
 
   // Determine epipolar lines equation
   std::vector<cv::Vec3d> leftLines, rightLines;
@@ -734,8 +738,8 @@ void OpenHSML::save_image_with_points_and_epipolar_lines(std::string calibration
     double x0_opencv_left,y0_opencv_left,x1_opencv_left,y1_opencv_left, a_opencv_left=l_left.val[0], b_opencv_left=l_left.val[1], c_opencv_left=l_left.val[2];
     x0_opencv_left=0; y0_opencv_left=(-c_opencv_left-a_opencv_left*x0_opencv_left)/b_opencv_left; x1_opencv_left=Image3DWithEpipolarLines.cols; y1_opencv_left=(-c_opencv_left-a_opencv_left*x1_opencv_left)/b_opencv_left;
 
-    cv::line(Image2DWithEpipolarLines, cvPoint(x0_opencv_right,y0_opencv_right), cvPoint(x1_opencv_right,y1_opencv_right), cv::Scalar(0, 0, 0), 1);
-    cv::line(Image3DWithEpipolarLines, cvPoint(x0_opencv_left,y0_opencv_left), cvPoint(x1_opencv_left,y1_opencv_left), cv::Scalar(0, 0, 0), 1);
+    cv::line(Image2DWithEpipolarLines, cv::Point(x0_opencv_right,y0_opencv_right), cv::Point(x1_opencv_right,y1_opencv_right), cv::Scalar(0, 0, 0), 1);
+    cv::line(Image3DWithEpipolarLines, cv::Point(x0_opencv_left,y0_opencv_left), cv::Point(x1_opencv_left,y1_opencv_left), cv::Scalar(0, 0, 0), 1);
     cv::circle(Image2DWithPoints, (cv::Point2d(points_2D.at(i).x, points_2D.at(i).y)), 2, cv::Scalar(0, 0, 0), -1);
   }
 
@@ -766,7 +770,7 @@ void OpenHSML::select_point_manually_in_image(cv::Mat Image2DRGB, std::vector<fl
       }
       if ((end_selection==false) & (point_mode==true)) {
         finished2d=false;
-        cv::circle(img_2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+        cv::circle(img_2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
         std::cout << "Point selected: " << points_2D[i].x << ", " << points_2D[i].y << '\n';
         i=i+1;
       }
@@ -783,14 +787,14 @@ void OpenHSML::select_point_manually_in_image(cv::Mat Image2DRGB, std::vector<fl
         if(keyboard == 27) { std::cout << "'ESC' pressed: end of selection" << std::endl; end_selection=true; break;}
       }
       if ((end_selection==false) & (quadrilater_mode==true)) {
-        finished2d=false; cv::circle(img_2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+        finished2d=false; cv::circle(img_2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
         std::cout << "Point selected: " << points_2D[i].x << ", " << points_2D[i].y << '\n'; i=i+1;
         while( (!finished2d) ) {
           cv::imshow("select point(s) in this image",img_2D);
           if((char)cv::waitKey(50) == 27) { std::cout << "'ESC' pressed: you can't exit here. Select a second point." << std::endl;}
         }
         if (end_selection==false) {
-          finished2d=false; cv::circle(img_2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+          finished2d=false; cv::circle(img_2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
           std::cout << "Point selected: " << points_2D[i].x << ", " << points_2D[i].y << '\n'; i=i+1;
         }
         while( (!finished2d) ) {
@@ -798,7 +802,7 @@ void OpenHSML::select_point_manually_in_image(cv::Mat Image2DRGB, std::vector<fl
           if((char)cv::waitKey(50) == 27) { std::cout << "'ESC' pressed: you can't exit here. Select a third point." << std::endl;}
         }
         if (end_selection==false) {
-          finished2d=false; cv::circle(img_2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+          finished2d=false; cv::circle(img_2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
           std::cout << "Point selected: " << points_2D[i].x << ", " << points_2D[i].y << '\n'; i=i+1;
         }
         while( (!finished2d) ) {
@@ -806,7 +810,7 @@ void OpenHSML::select_point_manually_in_image(cv::Mat Image2DRGB, std::vector<fl
           if((char)cv::waitKey(50) == 27) { std::cout << "'ESC' pressed: you can't exit here. Select a fourth point." << std::endl;}
         }
         if (end_selection==false) {
-          finished2d=false; cv::circle(img_2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+          finished2d=false; cv::circle(img_2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
           std::cout << "Point selected: " << points_2D[i].x << ", " << points_2D[i].y << '\n'; i=i+1;
         }
         // ajouter tout les points avec la fonction
@@ -818,7 +822,7 @@ void OpenHSML::select_point_manually_in_image(cv::Mat Image2DRGB, std::vector<fl
           8, uv_vect); // ????
           for (size_t k = 0; k < uv_vect.size(); k++) {
             points_2D.push_back( cv::Point(uv_vect[k][0], uv_vect[k][1]) );
-            cv::circle(img_2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1); i=i+1;
+            cv::circle(img_2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1); i=i+1;
           }
       }
     }
@@ -834,14 +838,14 @@ void OpenHSML::select_point_manually_in_image(cv::Mat Image2DRGB, std::vector<fl
         if(keyboard == 27) { std::cout << "'ESC' pressed: end of selection" << std::endl; end_selection=true; break;}
       }
       if ((end_selection==false) & (line_mode==true)) {
-        finished2d=false; cv::circle(img_2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+        finished2d=false; cv::circle(img_2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
         std::cout << "Point selected: " << points_2D[i].x << ", " << points_2D[i].y << '\n'; i=i+1;
         while( (!finished2d) ) {
           cv::imshow("select point(s) in this image",img_2D);
           if((char)cv::waitKey(50) == 27) { std::cout << "'ESC' pressed: you can't exit here. Select a second point." << std::endl;}
         }
         if (end_selection==false) {
-          finished2d=false; cv::circle(img_2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
+          finished2d=false; cv::circle(img_2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
           std::cout << "Point selected: " << points_2D[i].x << ", " << points_2D[i].y << '\n'; i=i+1;
         }
         // ajouter tout les points avec la fonction
@@ -849,7 +853,7 @@ void OpenHSML::select_point_manually_in_image(cv::Mat Image2DRGB, std::vector<fl
         sampling_line_between_two_points({points_2D[i-2].x, points_2D[i-2].y}, {points_2D[i-1].x, points_2D[i-1].y}, 8, uv_vect);
         for (size_t k = 0; k < uv_vect.size(); k++) {
           points_2D.push_back( cv::Point(uv_vect[k][0], uv_vect[k][1]) );
-          cv::circle(img_2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1); i=i+1;
+          cv::circle(img_2D, (cv::Point(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1); i=i+1;
         }
       }
     }
@@ -947,7 +951,7 @@ void OpenHSML::estimation_of_the_points_closest_to_the_initial_points(std::vecto
     else { distance.push_back( 1000 ); }
   }
 
-  const auto [min, max] = std::minmax_element(begin(distance), end(distance));
+  const auto min = std::min_element(begin(distance), end(distance));
   for (size_t j=0; j<distance.size(); j++) {
     if ( distance[j] == *min ) {
       // save 3D points estimated in pixels
@@ -988,14 +992,14 @@ void OpenHSML::display_or_save_all_img(std::vector<float> input_u, std::vector<f
       input_points.r.push_back( myVec[((int)(input_points.v[i])*input_img_2D.cols+(int)(input_points.u[i]))*3+0] );
       input_points.g.push_back( myVec[((int)(input_points.v[i])*input_img_2D.cols+(int)(input_points.u[i]))*3+1] );
       input_points.b.push_back( myVec[((int)(input_points.v[i])*input_img_2D.cols+(int)(input_points.u[i]))*3+2] );
-      color = cvScalar(input_points.r[i], input_points.g[i], input_points.b[i]);
+      color = cv::Scalar(input_points.r[i], input_points.g[i], input_points.b[i]);
 
       // Draw
-      cv::circle(img2D_pt_desired, (cvPoint(input_u[i],input_v[i])),3, color, -1);
-      cv::line(img3D_epipolar_lines,cvPoint(uv_vvect[i][0][0],uv_vvect[i][0][1]),cvPoint(uv_vvect[i][uv_vvect[i].size()-1][0],uv_vvect[i][uv_vvect[i].size()-1][1]),color, 1);
-      for (size_t j=0; j<uv_vvect[i].size(); j++) { cv::circle(img3D_epipolar_lines_sampling, (cvPoint(uv_vvect[i][j][0],uv_vvect[i][j][1])),3, color, -1); }
-      for (size_t j=0; j<m_2D_vvect[i].size(); j++) { cv::circle(img2D_pt_estimated_sampling_points, (cvPoint(m_2D_vvect[i][j][0],m_2D_vvect[i][j][1])),3, color, -1); }
-      cv::circle(img3D_pt_estimated   , (cvPoint(output_u[i],output_v[i])),3, color, -1);
+      cv::circle(img2D_pt_desired, (cv::Point(input_u[i],input_v[i])),3, color, -1);
+      cv::line(img3D_epipolar_lines,cv::Point(uv_vvect[i][0][0],uv_vvect[i][0][1]),cv::Point(uv_vvect[i][uv_vvect[i].size()-1][0],uv_vvect[i][uv_vvect[i].size()-1][1]),color, 1);
+      for (size_t j=0; j<uv_vvect[i].size(); j++) { cv::circle(img3D_epipolar_lines_sampling, (cv::Point(uv_vvect[i][j][0],uv_vvect[i][j][1])),3, color, -1); }
+      for (size_t j=0; j<m_2D_vvect[i].size(); j++) { cv::circle(img2D_pt_estimated_sampling_points, (cv::Point(m_2D_vvect[i][j][0],m_2D_vvect[i][j][1])),3, color, -1); }
+      cv::circle(img3D_pt_estimated   , (cv::Point(output_u[i],output_v[i])),3, color, -1);
 
       // Python
       file_to_display_with_python << output_points.x[i] << " " << output_points.y[i] << " " << output_points.z[i] << " " << input_points.r[i]  << " " << input_points.g[i]  << " " << input_points.b[i]  << std::endl;
@@ -1102,5 +1106,3 @@ void OpenHSML::stereovision_hybrid(cv::Mat fundamental_matrix, Eigen::MatrixXd p
     display_or_save_all_img(input_points.u, input_points.v, output_points.u, output_points.v, uv_vvect, m_2D_vvect, input_img.Image2DRGB, input_img.Img3DGS, arg_display, arg_save, nameFile_toSave);
   }
 }
-
-#endif

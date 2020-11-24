@@ -6,18 +6,17 @@
 	* @version 1.0.0
 	* @date 31-10-2020
 	*/
-#include "Eigen"
-#include <yaml-cpp/yaml.h>
-#include <experimental/filesystem>
-
-#include <opencv2/opencv.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
 
 #ifndef OPENHSML_H
 #define OPENHSML_H
+
+#include <eigen3/Eigen/Eigen>
+#include <yaml-cpp/yaml.h>
+#include <opencv2/core/core.hpp>
+
+#include <string>
+#include <vector>
+#include <array>
 
 static void mouse_call(int event,int x,int y, int, void* param);
 static void mouse_call2d(int event,int x,int y, int, void* param);
