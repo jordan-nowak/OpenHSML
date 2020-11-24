@@ -6,8 +6,11 @@
 	* @version 1.0.0
 	* @date 31-10-2020
 	*/
-#include "OpenHSML.h"
-#include "matplotlib-cpp/matplotlibcpp.h"
+#include <OpenHSML.h>
+#include <matplotlib-cpp/matplotlibcpp.h>
+#include <opencv2/imgcodecs.hpp>
+
+#include <experimental/filesystem>
 
 int main(int argc, char* argv[]) {
   std::cout<<"\x1B[1m"<<"-- Start hybrid stereovision program"<<"\x1B[0m"<<std::endl;
