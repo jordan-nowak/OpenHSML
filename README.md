@@ -83,7 +83,6 @@ cmake -D GLIBCXX_USE_CXX11_ABI=0 \
       -D INSTALL_PYTHON_EXAMPLES=ON \
       -D WITH_TBB=ON \
       -D WITH_V4L=ON \
-      -D WITH_QT=ON \
       -D WITH_OPENGL=ON \
       -D WITH_LIBV4L=ON \
       -D WITH_CUDA=OFF \
@@ -112,7 +111,7 @@ cp -r yaml-cpp/ ../../../lib/
 
 #### Install matplotlib-cpp library (local):
 ```
-sudo apt-get install python-matplotlib python-numpy python2.7-dev
+sudo apt-get install python-matplotlib python-numpy python3.6-dev
 cd path/to/OpenHSML/include/lib/
 git clone https://github.com/lava/matplotlib-cpp.git
 ```

@@ -17,22 +17,22 @@ bool finished3d;
 
 static void mouse_call(int event,int x,int y, int, void* param) {
   if(event==cv::EVENT_LBUTTONDOWN){
-    std::vector<cv::Point>* ptPtr = (std::vector<cv::Point>*)param;
-    ptPtr->push_back(cv::Point(x,y));
+    std::vector<cv::Point2d>* ptPtr = (std::vector<cv::Point2d>*)param;
+    ptPtr->push_back(cv::Point2d(x,y));
     finished=true;
   }
 }
 static void mouse_call2d(int event,int x,int y, int, void* param) {
   if(event==cv::EVENT_LBUTTONDOWN){
-    std::vector<cv::Point>* ptPtr = (std::vector<cv::Point>*)param;
-    ptPtr->push_back(cv::Point(x,y));
+    std::vector<cv::Point2d>* ptPtr = (std::vector<cv::Point2d>*)param;
+    ptPtr->push_back(cv::Point2d(x,y));
     finished2d=true;
   }
 }
 static void mouse_call3d(int event,int x,int y, int, void* param) {
   if(event==cv::EVENT_LBUTTONDOWN){
-    std::vector<cv::Point>* ptPtr = (std::vector<cv::Point>*)param;
-    ptPtr->push_back(cv::Point(x,y));
+    std::vector<cv::Point2d>* ptPtr = (std::vector<cv::Point2d>*)param;
+    ptPtr->push_back(cv::Point2d(x,y));
     finished3d=true;
   }
 }
@@ -283,15 +283,13 @@ void OpenHSML::write_yaml_file_of_calibration(std::vector<double> depth_paramete
   outYaml.close();
 }
 void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& points_3D_yaml_save, std::vector<cv::Point2d>& points_2D_yaml_save, std::vector<std::array<float, 3>>& points_xyz_yaml_save, std::vector<double>& depth_parameters, std::string calibration_namefile) {
-  std::vector<cv::Point> points_2D, points_3D;
-  std::vector<std::array<float, 3>> points_xyz;
+  std::vector<cv::Point2d> points_2D, points_3D;
+  std::vector<std::array<double, 3>> points_xyz;
+  std::vector<std::string> name_file_2d, name_file_xyz;
 
-  std::vector<std::string> name_file_2d, name_file_3d, name_file_xyz;
-  for(auto& p: std::experimental::filesystem::directory_iterator(calibration_namefile+"/2d"))
-  name_file_2d.push_back(p.path());
+  for(auto& p: boost::filesystem::directory_iterator(calibration_namefile+"/2d")) { name_file_2d.push_back(p.path().string()); }
+  for(auto& p: boost::filesystem::directory_iterator(calibration_namefile+"/depth")) { name_file_xyz.push_back(p.path().string()); }
   std::sort(name_file_2d.begin(), name_file_2d.end());
-  for(auto& p: std::experimental::filesystem::directory_iterator(calibration_namefile+"/depth")) // xyz ?
-  name_file_xyz.push_back(p.path());
   std::sort(name_file_xyz.begin(), name_file_xyz.end());
 
   std::string yes_no="";
@@ -422,7 +420,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
           std::vector<std::array<float, 2>> uv_vect; uv_vect.clear();
           sampling_square_with_four_points( {points_2D[i-3].x, points_2D[i-3].y}, {points_2D[i-2].x, points_2D[i-2].y}, {points_2D[i-1].x, points_2D[i-1].y}, {points_2D[i-0].x, points_2D[i-0].y}, nb_of_pt_by_line, uv_vect);
           for (size_t k = 0; k < uv_vect.size(); k++) {
-            points_2D.push_back( cv::Point(uv_vect[k][0], uv_vect[k][1]) ); i=i+1;
+            points_2D.push_back( cv::Point2d(uv_vect[k][0], uv_vect[k][1]) ); i=i+1;
             cv::circle(Image2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
           }
 
@@ -484,7 +482,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
             {points_3D[i-0].x, points_3D[i-0].y},
             nb_of_pt_by_line, uv_vect);
             for (size_t k = 0; k < uv_vect.size(); k++) {
-              points_3D.push_back( cv::Point(uv_vect[k][0], uv_vect[k][1]) ); i=i+1;
+              points_3D.push_back( cv::Point2d(uv_vect[k][0], uv_vect[k][1]) ); i=i+1;
               cv::circle(Image3D, (cvPoint(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
             }
 
@@ -541,7 +539,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
             std::vector<std::array<float, 2>> uv_vect; uv_vect.clear();
             sampling_line_between_two_points({points_2D[i-1].x, points_2D[i-1].y}, {points_2D[i-0].x, points_2D[i-0].y}, 8, uv_vect);
             for (size_t k = 1; k < uv_vect.size()-1; k++) {
-              points_2D.push_back( cv::Point(uv_vect[k][0], uv_vect[k][1]) ); i=i+1;
+              points_2D.push_back( cv::Point2d(uv_vect[k][0], uv_vect[k][1]) ); i=i+1;
               cv::circle(Image2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1);
             }
             i=i-uv_vect.size()+1;
@@ -576,7 +574,7 @@ void OpenHSML::modification_of_calibration_of_points(std::vector<cv::Point2d>& p
             uv_vect.clear();
             sampling_line_between_two_points({points_3D[i-1].x, points_3D[i-1].y}, {points_3D[i-0].x, points_3D[i-0].y}, 8, uv_vect);
             for (size_t k = 1; k < uv_vect.size()-1; k++) {
-              points_3D.push_back( cv::Point(uv_vect[k][0], uv_vect[k][1]) ); i=i+1;
+              points_3D.push_back( cv::Point2d(uv_vect[k][0], uv_vect[k][1]) ); i=i+1;
               cv::circle(Image3D, (cvPoint(points_3D[i].x, points_3D[i].y)), 3, (255, 0, 0), -1);
             }
             i=i-uv_vect.size()+1;
@@ -746,7 +744,7 @@ void OpenHSML::save_image_with_points_and_epipolar_lines(std::string calibration
 
 // Global function:
 void OpenHSML::select_point_manually_in_image(cv::Mat Image2DRGB, std::vector<float>& u, std::vector<float>& v) {
-  std::vector<cv::Point> points_2D;
+  std::vector<cv::Point2d> points_2D;
   cv::Mat img_2D = Image2DRGB.clone();
   int i=0;
   bool end_selection=false, quadrilater_mode=false, line_mode=false, point_mode=true;
@@ -817,7 +815,7 @@ void OpenHSML::select_point_manually_in_image(cv::Mat Image2DRGB, std::vector<fl
           {points_2D[i-1].x, points_2D[i-1].y},
           8, uv_vect); // ????
           for (size_t k = 0; k < uv_vect.size(); k++) {
-            points_2D.push_back( cv::Point(uv_vect[k][0], uv_vect[k][1]) );
+            points_2D.push_back( cv::Point2d(uv_vect[k][0], uv_vect[k][1]) );
             cv::circle(img_2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1); i=i+1;
           }
       }
@@ -848,7 +846,7 @@ void OpenHSML::select_point_manually_in_image(cv::Mat Image2DRGB, std::vector<fl
         std::vector<std::array<float, 2>> uv_vect; uv_vect.clear();
         sampling_line_between_two_points({points_2D[i-2].x, points_2D[i-2].y}, {points_2D[i-1].x, points_2D[i-1].y}, 8, uv_vect);
         for (size_t k = 0; k < uv_vect.size(); k++) {
-          points_2D.push_back( cv::Point(uv_vect[k][0], uv_vect[k][1]) );
+          points_2D.push_back( cv::Point2d(uv_vect[k][0], uv_vect[k][1]) );
           cv::circle(img_2D, (cvPoint(points_2D[i].x, points_2D[i].y)), 3, (255, 0, 0), -1); i=i+1;
         }
       }

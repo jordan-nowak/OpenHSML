@@ -48,14 +48,10 @@ int main(int argc, char* argv[]) {
   }
 
   if ( arg_test==true & arg_img==false) {
-    std::vector<std::string> name_file_2d;
-    for(auto& p: std::experimental::filesystem::directory_iterator(calibration_namefile+"/../img/2d"))
-    name_file_2d.push_back(p.path());
+    std::vector<std::string> name_file_2d, name_file_3d;
+    for(auto& p: boost::filesystem::directory_iterator(calibration_namefile+"/../img/2d")) { name_file_2d.push_back(p.path().string()); }
+    for(auto& p: boost::filesystem::directory_iterator(calibration_namefile+"/../img/depth")) { name_file_3d.push_back(p.path().string()); }
     std::sort(name_file_2d.begin(), name_file_2d.end());
-
-    std::vector<std::string> name_file_3d;
-    for(auto& p: std::experimental::filesystem::directory_iterator(calibration_namefile+"/../img/depth"))
-    name_file_3d.push_back(p.path());
     std::sort(name_file_3d.begin(), name_file_3d.end());
 
     std::vector<double> vect;
