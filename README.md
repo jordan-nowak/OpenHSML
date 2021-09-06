@@ -1,4 +1,3 @@
-
 OpenHSML - Open-source Hybrid Stereovision Matching Library.
 ==============
 ##  Description
@@ -31,11 +30,11 @@ A set of images is provided along with the library, in the following folders: *p
 Installation and Usage
 ======================
 
-The **openhsml** project is packaged using [PID](http://pid.lirmm.net), a build and deployment system based on CMake.
+The **OpenHSML** project is packaged using [PID](http://pid.lirmm.net), a build and deployment system based on CMake.
 
 If you wish to adopt PID for your develoment please first follow the installation procedure [here](http://pid.lirmm.net/pid-framework/pages/install.html).
 
-If you already are a PID user or wish to integrate **openhsml** in your current build system, please read the appropriate section below.
+If you already are a PID user or wish to integrate **OpenHSML** in your current build system, please read the appropriate section below.
 
 
 ## Using an existing PID workspace
@@ -43,8 +42,8 @@ If you already are a PID user or wish to integrate **openhsml** in your current 
 First clone the project and go in the folder cloned:
 ```
 cd path/to/pid-workspace/packages/
-git clone https://gite.lirmm.fr/nowak/openhsml.git
-cd openhsml/
+git clone https://github.com/jordan-nowak/OpenHSML.git
+cd OpenHSML/
 ```
 
 Then, go on the integration branch:
@@ -57,7 +56,7 @@ To finish, you start the code compilation as follows:
 pid build
 ```
 
-Once the package dependency has been added, you can use `openhsml/OpenHSML-shared` as a component dependency.
+Once the package dependency has been added, you can use `OpenHSML/OpenHSML-shared` as a component dependency.
 
 You can read [PID_Component](https://pid.lirmm.net/pid-framework/assets/apidoc/html/pages/Package_API.html#pid-component) and [PID_Component_Dependency](https://pid.lirmm.net/pid-framework/assets/apidoc/html/pages/Package_API.html#pid-component-dependency) documentations for more details.
 
@@ -67,45 +66,46 @@ This method allows to build the package without having to create a PID workspace
 
 All you need to do is to first clone the package locally and then run the installation script:
  ```
-git clone git@gite.lirmm.fr:nowak/openhsml.git
-cd openhsml
+git clone git@gite.lirmm.fr:nowak/OpenHSML.git
+cd OpenHSML
+git checkout integration
 ./share/install/standalone_install.sh
 ```
 The package as well as its dependencies will be deployed under `binaries/pid-workspace`.
 
 You can pass `--help` to the script to list the available options.
 
-### Using **openhsml** in a CMake project
-There are two ways to integrate **openhsml** in CMake project: the external API or a system install.
+### Using **OpenHSML** in a CMake project
+There are two ways to integrate **OpenHSML** in CMake project: the external API or a system install.
 
 The first one doesn't require the installation of files outside of the package itself and so is well suited when used as a Git submodule for example.
 Please read [this page](https://pid.lirmm.net/pid-framework/pages/external_API_tutorial.html#using-cmake) for more information.
 
-The second option is more traditional as it installs the package and its dependencies in a given system folder which can then be retrived using `find_package(openhsml)`.
+The second option is more traditional as it installs the package and its dependencies in a given system folder which can then be retrived using `find_package(OpenHSML)`.
 You can pass the `--install <path>` option to the installation script to perform the installation and then follow [these steps](https://pid.lirmm.net/pid-framework/pages/external_API_tutorial.html#third-step--extra-system-configuration-required) to configure your environment, find PID packages and link with their components.
 
-### Using **openhsml** with pkg-config
+### Using **OpenHSML** with pkg-config
 You can pass `--pkg-config on` to the installation script to generate the necessary pkg-config files.
-Upon completion, the script will tell you how to set the `PKG_CONFIG_PATH` environment variable for **openhsml** to be discoverable.
+Upon completion, the script will tell you how to set the `PKG_CONFIG_PATH` environment variable for **OpenHSML** to be discoverable.
 
 Then, to get the necessary compilation flags run:
 
 ```
-pkg-config --static --cflags openhsml_OpenHSML-shared
+pkg-config --static --cflags OpenHSML_OpenHSML-shared
 ```
 
 ```
-pkg-config --variable=c_standard openhsml_OpenHSML-shared
+pkg-config --variable=c_standard OpenHSML_OpenHSML-shared
 ```
 
 ```
-pkg-config --variable=cxx_standard openhsml_OpenHSML-shared
+pkg-config --variable=cxx_standard OpenHSML_OpenHSML-shared
 ```
 
 To get linker flags run:
 
 ```
-pkg-config --static --libs openhsml_OpenHSML-shared
+pkg-config --static --libs OpenHSML_OpenHSML-shared
 ```
 
 
@@ -113,7 +113,7 @@ pkg-config --static --libs openhsml_OpenHSML-shared
 ###  Build the project
 To build the library, in a terminal do the following command:
 ```
-cd path/to/pid-workspace/packages/openhsml/
+cd path/to/pid-workspace/packages/OpenHSML/
 pid build
 ```
 
@@ -124,7 +124,7 @@ If you have not yet modified the *share* folder, a small demonstration is availa
 To launch the demo apps, do the following command:
 ```
 cd path/to/pid-workspace/
-./install/x86_64_linux_stdc++11/openhsml/0.1.0/bin/openhsml_OpenHSML_apps -test -display
+./install/x86_64_linux_stdc++11/OpenHSML/0.1.0/bin/OpenHSML_OpenHSML_apps -test -display
 ```
 
 The `-test` argument allows to launch the demo mode which will take the images (RGB and depth) pre-recorded in the *path/to/OpenHSML/share/resources/img/* folder.
@@ -136,7 +136,7 @@ Indeed, when launching this command, you will be asked to click on the RGB image
 #### Calibration tutorial
 If you want to test the calibration with our demo apps, you can launch with the following command:
 ```
-./install/x86_64_linux_stdc++11/openhsml/0.1.0/bin/openhsml_OpenHSML_apps -calibration
+./install/x86_64_linux_stdc++11/OpenHSML/0.1.0/bin/OpenHSML_OpenHSML_apps -calibration
 ```
 
 Remark: If you put your own images in the calibration folder *path/to/OpenHSML/share/resources/calibration/*, make sure you save them in the right format. The RGB images can be saved in any image format readable by OpenCV (for example *.png* or *.jpg*). The depth images are save in a YAML file with [storage class](https://docs.opencv.org/3.4.12/da/d56/classcv_1_1FileStorage.html) in OpenCV.
@@ -162,10 +162,10 @@ Offline API Documentation
 
 With [Doxygen](https://www.doxygen.nl) installed, the API documentation can be built locally by turning the `BUILD_API_DOC` CMake option `ON` and running the `doc` target, e.g
 ```
-pid cd openhsml
+pid cd OpenHSML
 pid -DBUILD_API_DOC=ON doc
 ```
-The resulting documentation can be accessed by opening `<path to openhsml>/build/release/share/doc/html/index.html` in a web browser.
+The resulting documentation can be accessed by opening `<path to OpenHSML>/build/release/share/doc/html/index.html` in a web browser.
 
 License
 =======
