@@ -1,5 +1,5 @@
 
-Software license for the software named : openhsml
+Software license for the software named : OpenHSML
 
 Software description : A simple library for finding the point correspondence between an RGB and a depth image.
 
