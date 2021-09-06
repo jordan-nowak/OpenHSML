@@ -9,7 +9,7 @@ link_libraries(stdc++fs python3.6m)
 include_directories(/usr/include/python3.6)
 
 
-project(openhsml)
+project(OpenHSML)
 
 PID_Package(
 			AUTHOR      Nowak Jordan
