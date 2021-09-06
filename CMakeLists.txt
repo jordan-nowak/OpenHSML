@@ -1,34 +1,29 @@
-cmake_minimum_required(VERSION 3.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0.2)
+set(WORKSPACE_DIR ${CMAKE_SOURCE_DIR}/../.. CACHE PATH "root of the PID workspace directory")
+list(APPEND CMAKE_MODULE_PATH ${WORKSPACE_DIR}/share/cmake/system) # using generic scripts/modules of the workspace
+include(Package_Definition NO_POLICY_SCOPE)
 
-project(OpenHSML)
-set(EXECUTABLE_OUTPUT_PATH ../bin)
+add_compile_options(-O2 -Wall -Wextra -Werror -Wunused -Wpedantic)
 
-set(VREP_CFLAGS "-DNON_MATLAB_PARSING -DMAX_EXT_API_CONNECTIONS=255 -D__linux")
+link_libraries(stdc++fs python3.6m)
+include_directories(/usr/include/python3.6)
 
-set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -fPIC")
 
-file( GLOB_RECURSE lib_source_files include/lib/* src/* )
+project(openhsml)
 
-include_directories( include/lib/ )
-include_directories( include/lib/Eigen/ )
-include_directories( include/lib/yaml-cpp/ )
-include_directories( /usr/include/python3.6/ )
-include_directories( include/lib/matplotlib-cpp/ )
-include_directories( include/lib/opencv/ )
+PID_Package(
+			AUTHOR      Nowak Jordan
+			ADDRESS	    git@gite.lirmm.fr:nowak/openhsml.git
+			YEAR        2020
+			LICENSE     GNULGPL
+			DESCRIPTION A simple library for finding the point correspondence between an RGB and a depth image.
+			VERSION     0.1.0
+		)
 
-set( OpenCV_DIR "include/lib/opencv/share/OpenCV" )
-find_package( OpenCV REQUIRED )
 
-link_libraries(stdc++fs python3.6m boost_filesystem boost_system opencv_calib3d opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs)
 
-find_package( yaml-cpp REQUIRED )
-find_package ( Eigen3 REQUIRED )
+PID_Dependency(yaml-cpp VERSION 0.6.3)
+PID_Dependency(opencv VERSION 4.0.1)
+PID_Dependency(eigen)
 
-add_library( library_source ${lib_source_files} )
-target_link_libraries( library_source ${CMAKE_THREAD_LIBS_INIT} ${OpenCV_LIBS} yaml-cpp Eigen3::Eigen )
-
-file( GLOB_RECURSE exemple_source_files apps/* )
-add_executable(demo ${exemple_source_files})
-target_link_libraries(demo library_source)
+build_PID_Package()

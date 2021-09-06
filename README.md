@@ -1,15 +1,26 @@
-# OpenHSML
-OpenHSML - Open-source Hybrid Stereovision Matching Library.
 
+OpenHSML - Open-source Hybrid Stereovision Matching Library.
+==============
 ##  Description
 We propose a simple approach for finding the point correspondence between an RGB and a depth image. This approach uses the principles of stereovision to find the points of interest in the depth image without going through image alignment. Our method requires a quick and simple calibration, without the need for a checkerboard, to determine the stereo model. This model allows us to solve our problem without having to determine the camera parameters.
 
-## Project organization
+# Table of Contents
+ - [Package Overview](#package-overview)
+ - [Installation and Usage](#installation-and-usage)
+ - [Offline API Documentation](#offline-api-documentation)
+ - [License](#license)
+ - [Authors](#authors)
+
+
+
+
+Package Overview
+================
+
 The library OpenHSML is written in C++ and developed on the Unix system Ubuntu 18.04.
 
 The OpenHSML project hierarchy is the following:
-- apps: examples to help get started with OpenHSML.
-- bin: executables output directory.
+- apps: an example to help get started with OpenHSML : **OpenHSML_apps**.
 - build: build directory.
 - share: files/folders necessary for calibration.
 - src: source files.
@@ -17,112 +28,93 @@ The OpenHSML project hierarchy is the following:
 
 A set of images is provided along with the library, in the following folders: *path/to/library/share/resources/calibration/2d* for the RGB images and *path/to/library/share/resources/calibration/depth* for the depth images.
 
+Installation and Usage
+======================
 
-##  Installation
-### Clone the project:
-First clone the project and go in the folder cloned.
-```
-git clone https://github.com/jordan-nowak/OpenHSML.git
-cd OpenHSML/
-```
+The **openhsml** project is packaged using [PID](http://pid.lirmm.net), a build and deployment system based on CMake.
 
-<!--
-### Automatic installation:
-Then run the install script on your linux system to install all dependencies (OpenCV, Eigen and yaml-cpp):
-```
-...
-```
-Remark: for OpenCV all 2.X and 3.X versions are compatible.
--->
+If you wish to adopt PID for your develoment please first follow the installation procedure [here](http://pid.lirmm.net/pid-framework/pages/install.html).
 
-### Manual installation:
-#### Install CMake GUI:
-- Start by updating the packages list:
+If you already are a PID user or wish to integrate **openhsml** in your current build system, please read the appropriate section below.
+
+
+## Using an existing PID workspace
+
+First clone the project and go in the folder cloned:
 ```
-sudo apt -y update
-sudo apt -y upgrade
+cd path/to/pid-workspace/packages/
+git clone https://gite.lirmm.fr/nowak/openhsml.git
+cd openhsml/
 ```
 
-- Install the build-essential and cmake package by typing:
+Then, go on the integration branch:
 ```
-sudo apt-get install build-essential
-sudo apt-get install cmake
-```
-
-- To validate that the GCC compiler is successfully installed, use the `gcc --version` command which prints the GCC version.
-
-#### Install Doxygen to generate the software documentation:
-```
-sudo apt install graphviz doxygen doxygen-gui
+git checkout integration
 ```
 
-<!-- Pour le moment -->
-#### Install Eigen library (local):
+To finish, you start the code compilation as follows:
 ```
-cd path/to/OpenHSML/include/source_lib/
-git clone https://gitlab.com/libeigen/eigen.git
-cd eigen/
-cp -r Eigen ../../lib/
+pid build
 ```
 
-#### Install OpenCV library (local):
+Once the package dependency has been added, you can use `openhsml/OpenHSML-shared` as a component dependency.
+
+You can read [PID_Component](https://pid.lirmm.net/pid-framework/assets/apidoc/html/pages/Package_API.html#pid-component) and [PID_Component_Dependency](https://pid.lirmm.net/pid-framework/assets/apidoc/html/pages/Package_API.html#pid-component-dependency) documentations for more details.
+
+## Standalone installation
+
+This method allows to build the package without having to create a PID workspace manually. This method is UNIX only.
+
+All you need to do is to first clone the package locally and then run the installation script:
+ ```
+git clone git@gite.lirmm.fr:nowak/openhsml.git
+cd openhsml
+./share/install/standalone_install.sh
 ```
-cd path/to/OpenHSML/include/source_lib/
-cwd=$(pwd) && cvVersion="3.4.12"
-mkdir opencv_src
-cd opencv_src
-git clone https://github.com/opencv/opencv.git
-cd opencv/ && git checkout $cvVersion
-mkdir build && cd build
+The package as well as its dependencies will be deployed under `binaries/pid-workspace`.
+
+You can pass `--help` to the script to list the available options.
+
+### Using **openhsml** in a CMake project
+There are two ways to integrate **openhsml** in CMake project: the external API or a system install.
+
+The first one doesn't require the installation of files outside of the package itself and so is well suited when used as a Git submodule for example.
+Please read [this page](https://pid.lirmm.net/pid-framework/pages/external_API_tutorial.html#using-cmake) for more information.
+
+The second option is more traditional as it installs the package and its dependencies in a given system folder which can then be retrived using `find_package(openhsml)`.
+You can pass the `--install <path>` option to the installation script to perform the installation and then follow [these steps](https://pid.lirmm.net/pid-framework/pages/external_API_tutorial.html#third-step--extra-system-configuration-required) to configure your environment, find PID packages and link with their components.
+
+### Using **openhsml** with pkg-config
+You can pass `--pkg-config on` to the installation script to generate the necessary pkg-config files.
+Upon completion, the script will tell you how to set the `PKG_CONFIG_PATH` environment variable for **openhsml** to be discoverable.
+
+Then, to get the necessary compilation flags run:
+
 ```
-```
-cmake -D GLIBCXX_USE_CXX11_ABI=0 \
-      -D CMAKE_BUILD_TYPE=RELEASE \
-      -D ENABLE_FAST_MATH=ON \
-      -D CMAKE_INSTALL_PREFIX=$cwd/opencv_src/opencv_lib \
-      -D INSTALL_PYTHON_EXAMPLES=ON \
-      -D WITH_TBB=ON \
-      -D WITH_V4L=ON \
-      -D WITH_OPENGL=ON \
-      -D WITH_LIBV4L=ON \
-      -D WITH_CUDA=OFF \
-      -D BUILD_TESTS=OFF \
-      -D BUILD_PERF_TESTS=OFF \
-      -D BUILD_EXAMPLES=OFF ..
-```
-```
-make -j`nproc` && make install
-```
-```
-cd ../../ && cp -r opencv_lib/ ../../lib/
-cd ../../lib/ && mv opencv_lib/ opencv/
+pkg-config --static --cflags openhsml_OpenHSML-shared
 ```
 
-#### Install yaml-cpp library:
 ```
-cd path/to/OpenHSML/include/source_lib/
-git clone https://github.com/jbeder/yaml-cpp.git
-cd yaml-cpp/ && mkdir build && cd build
-cmake ..
-make
-cd ../include/
-cp -r yaml-cpp/ ../../../lib/
+pkg-config --variable=c_standard openhsml_OpenHSML-shared
 ```
 
-#### Install matplotlib-cpp library (local):
 ```
-sudo apt-get install python-matplotlib python-numpy python3.6-dev
-cd path/to/OpenHSML/include/lib/
-git clone https://github.com/lava/matplotlib-cpp.git
+pkg-config --variable=cxx_standard openhsml_OpenHSML-shared
 ```
 
-##  Getting Started
+To get linker flags run:
+
+```
+pkg-config --static --libs openhsml_OpenHSML-shared
+```
+
+
+##  Usage - Getting Started
 ###  Build the project
 To build the library, in a terminal do the following command:
 ```
-cd path/to/OpenHSML/build
-cmake ..
-make
+cd path/to/pid-workspace/packages/openhsml/
+pid build
 ```
 
 ### Demonstration
@@ -131,8 +123,8 @@ If you have not yet modified the *share* folder, a small demonstration is availa
 #### Application
 To launch the demo apps, do the following command:
 ```
-cd path/to/OpenHSML/
-./bin/demo -test -display
+cd path/to/pid-workspace/
+./install/x86_64_linux_stdc++11/openhsml/0.1.0/bin/openhsml_OpenHSML_apps -test -display
 ```
 
 The `-test` argument allows to launch the demo mode which will take the images (RGB and depth) pre-recorded in the *path/to/OpenHSML/share/resources/img/* folder.
@@ -141,12 +133,10 @@ The `-display` argument allows us to display the different steps and the results
 
 Indeed, when launching this command, you will be asked to click on the RGB image presented on your screen to select points. When you are done selecting the points, a simple press on the `ESC` key will launch the estimation.
 
-<!-- Numeric tools -->
-
 #### Calibration tutorial
 If you want to test the calibration with our demo apps, you can launch with the following command:
 ```
-./bin/demo -calibration
+./install/x86_64_linux_stdc++11/openhsml/0.1.0/bin/openhsml_OpenHSML_apps -calibration
 ```
 
 Remark: If you put your own images in the calibration folder *path/to/OpenHSML/share/resources/calibration/*, make sure you save them in the right format. The RGB images can be saved in any image format readable by OpenCV (for example *.png* or *.jpg*). The depth images are save in a YAML file with [storage class](https://docs.opencv.org/3.4.12/da/d56/classcv_1_1FileStorage.html) in OpenCV.
@@ -167,9 +157,25 @@ To facilitate calibration, it is possible to activate several selection modes, v
 For these digital tools to work properly, you must select the points in both images in the same order. To move to the next image, you should press the `ESC` key.
 
 
-##  About authors
-OpenHSML has been developped by following authors: Jordan Nowak (LIRMM)
+Offline API Documentation
+=========================
 
-Please contact Jordan Nowak (nowak@lirmm.fr) - LIRMM for more information or questions.
+With [Doxygen](https://www.doxygen.nl) installed, the API documentation can be built locally by turning the `BUILD_API_DOC` CMake option `ON` and running the `doc` target, e.g
+```
+pid cd openhsml
+pid -DBUILD_API_DOC=ON doc
+```
+The resulting documentation can be accessed by opening `<path to openhsml>/build/release/share/doc/html/index.html` in a web browser.
 
-<!-- ##  Reference and documentation -->
+License
+=======
+
+The license that applies to the whole package content is **GNU Lesser General Public License version 3 (GNU GPLv3)**. Please look at the [license.txt](./license.txt) file at the root of this repository for more details.
+
+Authors
+=======
+
+OpenHSML has been developped by following authors:
++ Nowak Jordan (LIRMM)
+
+Please contact Nowak Jordan (nowak@lirmm.fr) - LIRMM for more information or questions.
