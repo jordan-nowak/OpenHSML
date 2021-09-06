@@ -13,7 +13,7 @@ project(openhsml)
 
 PID_Package(
 			AUTHOR      Nowak Jordan
-			ADDRESS	    git@gite.lirmm.fr:nowak/openhsml.git
+			ADDRESS	    https://github.com/jordan-nowak/OpenHSML.git
 			YEAR        2020
 			LICENSE     GNULGPL
 			DESCRIPTION A simple library for finding the point correspondence between an RGB and a depth image.

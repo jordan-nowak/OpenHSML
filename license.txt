@@ -3,7 +3,7 @@ Software license for the software named : openhsml
 
 Software description : A simple library for finding the point correspondence between an RGB and a depth image.
 
-Copyright (C) 2020 Nowak Jordan (LIRMM)
+Copyright (C) 2020  Nowak Jordan ()
 
 This software is free software: you can redistribute it and/or modify it under the terms of the LGPL license as published by
  the Free Software Foundation, either version 3 of the License, or (at your option) any later version. This software

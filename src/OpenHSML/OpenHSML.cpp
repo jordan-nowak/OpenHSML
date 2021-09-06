@@ -177,8 +177,8 @@ void OpenHSML::read_yaml_file_of_point_of_calibration(std::string calibration_na
       points_2D_.push_back(cv::Point2d(u_2D[j].as<double>(), v_2D[j].as<double>()));
       points_3D_.push_back(cv::Point2d(u_3D[j].as<double>(), v_3D[j].as<double>()));
     }
-  }
 
+  }
   points_2D.clear(), points_3D.clear(); points_xyz.clear();
   for (size_t i=0; i<points_2D_.size(); i++) {
     points_3D.push_back(cv::Point2d(points_3D_[i].x, points_3D_[i].y));
