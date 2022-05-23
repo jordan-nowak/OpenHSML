@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
   }
 
   std::string wksp = getenv("wksp");
-  std::string calibration_namefile = wksp + "/packages/openhsml/share/resources/calibration";
+  std::string calibration_namefile = wksp + "/packages/OpenHSML/share/resources/calibration";
 
   if ( arg_calibration==true ) {
       stv.check_parameters_of_calibration_and_change_if_necessary(calibration_namefile);
